@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func commandMap(cfg *config) error {
+func commandMap(cfg *config, args ...string) error {
 	resp, err := cfg.client.ListLocationAreas(cfg.nextURL)
 
 	if err != nil {
@@ -22,7 +22,7 @@ func commandMap(cfg *config) error {
 	return nil
 }
 
-func commandMapb(cfg *config) error {
+func commandMapb(cfg *config, args ...string) error {
 	if cfg.nextURL == nil {
 		return errors.New("you're on the first page")
 	}

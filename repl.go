@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 const prompt = "Pokedex > "
@@ -11,7 +12,7 @@ const prompt = "Pokedex > "
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func startRepl(cfg *config) {
@@ -21,12 +22,21 @@ func startRepl(cfg *config) {
 		fmt.Print(prompt)
 		scanner.Scan()
 		cmd := scanner.Text()
-		commandName, ok := commands[cmd]
+		cleaned := cleanInput(cmd)
+		if len(cleaned) == 0 {
+			continue
+		}
+		command := cleaned[0]
+		args := []string{}
+		if len(cleaned) > 1 {
+			args = cleaned[1:]
+		}
+		commandName, ok := commands[command]
 		if !ok {
 			fmt.Println("Invalid Command!")
 			continue
 		}
-		err := commandName.callback(cfg)
+		err := commandName.callback(cfg, args...)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -55,5 +65,16 @@ func getCommands() map[string]cliCommand {
 			description: "Display the name of the previous 20 location areas in the Pokemon world",
 			callback:    commandMapb,
 		},
+		"explore": {
+			name:        "explore",
+			description: "List all pokemon in an area",
+			callback:    commandExplore,
+		},
 	}
+}
+
+func cleanInput(str string) []string {
+	lowStr := strings.ToLower(str)
+	words := strings.Fields(lowStr)
+	return words
 }
